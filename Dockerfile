@@ -1,8 +1,9 @@
-FROM golang:1.19-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.19 AS builder
+WORKDIR /app
 
 # Install the Certificate-Authority certificates for the app to be able to make
 # calls to HTTPS endpoints.
-RUN apk add --no-cache ca-certificates
+RUN apt update && apt install -y ca-certificates
 
 # Create the user and group files that will be used in the running container to
 # run the process as an unprivileged user.
@@ -12,7 +13,8 @@ RUN mkdir /user && \
 
 # Set the environment variables for the go command:
 # * CGO_ENABLED=0 to build a statically-linked executable
-ENV CGO_ENABLED=0 GOOS=linux
+ARG TARGETOS TARGETARCH
+ENV CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH
 
 COPY ./ ./
 
