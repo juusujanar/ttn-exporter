@@ -1,0 +1,34 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "prHourlyLimit": 0,
+  "prConcurrentLimit": 0,
+  "timezone": "Europe/Tallinn",
+  "schedule": [
+    "before 8am"
+  ],
+  "packageRules": [{
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "postUpdateOptions": [
+        "gomodUpdateImportPaths",
+        "gomodTidy"
+      ]
+    }
+  ]
+}

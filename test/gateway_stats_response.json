@@ -1,0 +1,24 @@
+{
+    "connected_at": "2022-01-31T13:06:14.455833434Z",
+    "protocol": "udp",
+    "last_status_received_at": "2022-02-12T10:31:24.046048254Z",
+    "last_status": {
+        "time": "2022-02-12T10:30:47Z",
+        "versions": {
+            "ttn-lw-gateway-server": "3.17.2"
+        },
+        "ip": [
+            "90.190.90.190"
+        ],
+        "metrics": {
+            "txin": 0,
+            "txok": 0,
+            "rxin": 0,
+            "rxok": 0,
+            "rxfw": 0,
+            "ackr": 0
+        }
+    },
+    "last_uplink_received_at": "2022-02-12T10:29:22.155225952Z",
+    "uplink_count": "9043"
+}
