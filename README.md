@@ -48,7 +48,7 @@ To run the exporter as a Docker container, run:
 docker run -p 9981:9981 ghcr.io/juusujanar/ttn-exporter:v1.0.0 --ttn.uri="https://<tenant>.<region>.cloud.thethings.industries/" --ttn.api-key="<key>"
 ```
 
-[hub]: https://hub.docker.com/r/juusujanar/ttn-exporter/
+[docker hub]: https://hub.docker.com/r/janarj/ttn-exporter/
 [github]: https://ghcr.io/repository/juusujanar/ttn-exporter
 
 ## License

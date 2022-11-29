@@ -41,8 +41,8 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            docker.io/juusujanar/ttn-exporter
-            ghcr.io/juusujanar/ttn-exporter
+            docker.io/janarj/ttn-exporter
+            ghcr.io/${{ github.repository }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
