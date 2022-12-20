@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -30,12 +30,12 @@ func newTTNServer(t *testing.T) *httptest.Server {
 		if err != nil {
 			t.Error(err)
 		}
-		bytes, err := ioutil.ReadAll(file)
+		bytes, err := io.ReadAll(file)
 		if err != nil {
 			t.Error(err)
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write(bytes)
+		_, _ = w.Write(bytes)
 	})
 	// NOTE: Golang does not support regex in patterns, so we're hardcoding this
 	mux.HandleFunc("/api/v3/gs/gateways", func(w http.ResponseWriter, r *http.Request) {
@@ -52,22 +52,16 @@ func newTTNServer(t *testing.T) *httptest.Server {
 		if err != nil {
 			t.Error(err)
 		}
-		bytes, err := ioutil.ReadAll(file)
+		bytes, err := io.ReadAll(file)
 		if err != nil {
 			t.Error(err)
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write(bytes)
+		_, _ = w.Write(bytes)
 	})
 
 	ts := httptest.NewServer(mux)
 	return ts
-}
-
-func handlerStale(exit chan bool) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		<-exit
-	}
 }
 
 func expectMetrics(t *testing.T, c prometheus.Collector, fixture string) {

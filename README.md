@@ -7,13 +7,19 @@ Works with:
 - Things Industries - untested
 - self-hosted Things Stack instances - untested
 
-## Getting started
+## Quick start
 
 To run the exporter:
 
 ```bash
 export TTN_API_KEY=<key>
-./ttn_exporter [flags]
+./ttn_exporter
+```
+
+If you want to use Docker:
+
+```bash
+docker run -p 9981:9981 -e TTN_API_KEY=<key> ghcr.io/juusujanar/ttn-exporter:v1.0.0
 ```
 
 Help on flags:
