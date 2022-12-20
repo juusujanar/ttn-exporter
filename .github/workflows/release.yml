@@ -1,22 +1,22 @@
 on:
   push:
-    branches:
-      - main
+    tags:
+      - '*'
 
 name: Release
 
 jobs:
-  release-please:
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v3
+  # release-please:
+  #   runs-on: ubuntu-22.04
+  #   permissions:
+  #     contents: write
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - uses: google-github-actions/release-please-action@v3
-        with:
-          release-type: go
-          package-name: ttn_exporter
+  #     - uses: google-github-actions/release-please-action@v3
+  #       with:
+  #         release-type: go
+  #         package-name: ttn_exporter
 
   goreleaser:
     runs-on: ubuntu-22.04
@@ -24,6 +24,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-go@v3
         with:
@@ -31,6 +33,7 @@ jobs:
           cache: true
 
       - uses: goreleaser/goreleaser-action@v4
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           distribution: goreleaser
           version: latest
