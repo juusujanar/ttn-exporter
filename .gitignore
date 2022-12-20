@@ -5,3 +5,5 @@ ttn_exporter
 *.test
 *.mprof
 *-stamp
+
+dist/

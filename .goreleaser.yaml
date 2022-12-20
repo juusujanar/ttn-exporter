@@ -1,0 +1,108 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
+    # you may remove this if you don't need go generate
+    - go generate ./...
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    goarm:
+      - "6"
+      - "7"
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+
+dockers:
+- image_templates:
+  - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-amd64
+  use: buildx
+  dockerfile: Dockerfile.goreleaser
+  build_flag_templates:
+  - --platform=linux/amd64
+  - --label=org.opencontainers.image.version={{ .Version }}
+  - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+  - --label=org.opencontainers.image.revision={{ .FullCommit }}
+- image_templates:
+  - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64
+  use: buildx
+  dockerfile: Dockerfile.goreleaser
+  build_flag_templates:
+  - --platform=linux/arm64
+  - --label=org.opencontainers.image.version={{ .Version }}
+  - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+  - --label=org.opencontainers.image.revision={{ .FullCommit }}
+- image_templates:
+  - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv7
+  use: buildx
+  dockerfile: Dockerfile.goreleaser
+  build_flag_templates:
+  - --platform=linux/arm/v7
+  - --label=org.opencontainers.image.version={{ .Version }}
+  - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+  - --label=org.opencontainers.image.revision={{ .FullCommit }}
+- image_templates:
+  - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv6
+  use: buildx
+  dockerfile: Dockerfile.goreleaser
+  build_flag_templates:
+  - --platform=linux/arm/v6
+  - --label=org.opencontainers.image.version={{ .Version }}
+  - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+  - --label=org.opencontainers.image.revision={{ .FullCommit }}
+
+docker_manifests:
+  - name_template: ghcr.io/juusujanar/ttn-exporter:{{ .Version }}
+    image_templates:
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-amd64
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64v8
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv6
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv7
+  - name_template: ghcr.io/juusujanar/ttn-exporter:latest
+    image_templates:
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-amd64
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64v8
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv6
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv7
+  - name_template: janarj/ttn-exporter:{{ .Version }}
+    image_templates:
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-amd64
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64v8
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv6
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv7
+  - name_template: janarj/ttn-exporter:latest
+    image_templates:
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-amd64
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64v8
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv6
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv7
+
+checksum:
+  name_template: 'checksums.txt'
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+# modelines, feel free to remove those if you don't want/use them:
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj

@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.19 AS builder
+FROM golang:1.19 AS builder
 WORKDIR /app
 
 # Install the Certificate-Authority certificates for the app to be able to make
@@ -11,17 +11,14 @@ RUN mkdir /user && \
   echo 'nobody:x:65534:65534:nobody:/:' > /user/passwd && \
   echo 'nobody:x:65534:' > /user/group
 
-# Set the environment variables for the go command:
-# * CGO_ENABLED=0 to build a statically-linked executable
-ARG TARGETOS TARGETARCH
-ENV CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH
-
-COPY ./ ./
-
-RUN go build -o /ttn_exporter ttn_exporter.go
+# Goreleaser uses the already built binaries, so we just need to copy
+COPY ttn-exporter /ttn-exporter
 
 # Final stage: the running container.
 FROM scratch AS final
+LABEL org.opencontainers.image.title=ttn-exporter
+LABEL org.opencontainers.image.description=ttn-exporter
+LABEL org.opencontainers.image.url=https://github.com/juusujanar/ttn-exporter
 LABEL org.opencontainers.image.source=https://github.com/juusujanar/ttn-exporter
 LABEL org.opencontainers.image.description="Prometheus exporter for The Things Network"
 LABEL org.opencontainers.image.licenses=MIT
@@ -33,8 +30,8 @@ COPY --from=builder /user/group /user/passwd
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 # Import the compiled executable from the first stage.
-COPY --from=builder /ttn_exporter /ttn_exporter
+COPY --from=builder /ttn-exporter /ttn-exporter
 
 EXPOSE      9981
 USER        65534:65534
-ENTRYPOINT  [ "/ttn_exporter" ]
+ENTRYPOINT  [ "/ttn-exporter" ]
