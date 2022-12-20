@@ -1,4 +1,4 @@
-# This is an example .goreleaser.yml file with some sensible defaults.
+# This is an example .yml file with some sensible defaults.
 # Make sure to check the documentation at https://goreleaser.com
 before:
   hooks:
@@ -33,7 +33,7 @@ dockers:
 - image_templates:
   - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-amd64
   use: buildx
-  dockerfile: Dockerfile.goreleaser
+  dockerfile: Dockerfile
   build_flag_templates:
   - --platform=linux/amd64
   - --label=org.opencontainers.image.version={{ .Version }}
@@ -42,7 +42,7 @@ dockers:
 - image_templates:
   - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64
   use: buildx
-  dockerfile: Dockerfile.goreleaser
+  dockerfile: Dockerfile
   build_flag_templates:
   - --platform=linux/arm64
   - --label=org.opencontainers.image.version={{ .Version }}
@@ -51,7 +51,7 @@ dockers:
 - image_templates:
   - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv7
   use: buildx
-  dockerfile: Dockerfile.goreleaser
+  dockerfile: Dockerfile
   build_flag_templates:
   - --platform=linux/arm/v7
   - --label=org.opencontainers.image.version={{ .Version }}
@@ -60,7 +60,7 @@ dockers:
 - image_templates:
   - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv6
   use: buildx
-  dockerfile: Dockerfile.goreleaser
+  dockerfile: Dockerfile
   build_flag_templates:
   - --platform=linux/arm/v6
   - --label=org.opencontainers.image.version={{ .Version }}
