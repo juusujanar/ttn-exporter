@@ -27,82 +27,82 @@ archives:
 
 dockers:
 - image_templates:
-  - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-amd64
-  - janarj/ttn-exporter:{{ .Version }}-amd64
+  - ghcr.io/juusujanar/{{ .ProjectName }}:{{ .Version }}-amd64
+  - janarj/{{ .ProjectName }}:{{ .Version }}-amd64
   use: buildx
   dockerfile: Dockerfile
   goos: linux
   goarch: amd64
   build_flag_templates:
-  - --platform=linux/amd64
-  - --label=org.opencontainers.image.title=ttn-exporter
-  - --label=org.opencontainers.image.description=ttn-exporter
-  - --label=org.opencontainers.image.url=https://github.com/juusujanar/ttn-exporter
-  - --label=org.opencontainers.image.source=https://github.com/juusujanar/ttn-exporter
-  - --label=org.opencontainers.image.description="Prometheus exporter for The Things Network"
-  - --label=org.opencontainers.image.licenses=MIT
-  - --label=org.opencontainers.image.version={{ .Version }}
-  - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
-  - --label=org.opencontainers.image.revision={{ .FullCommit }}
+  - "--platform=linux/amd64"
+  - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+  - "--label=org.opencontainers.image.description={{ .ProjectName }}"
+  - "--label=org.opencontainers.image.url=https://github.com/juusujanar/{{ .ProjectName }}"
+  - "--label=org.opencontainers.image.source=https://github.com/juusujanar/{{ .ProjectName }}"
+  - "--label=org.opencontainers.image.description="Prometheus exporter for The Things Network""
+  - "--label=org.opencontainers.image.licenses=MIT"
+  - "--label=org.opencontainers.image.version={{ .Version }}"
+  - "--label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}"
+  - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
 - image_templates:
-  - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64
-  - janarj/ttn-exporter:{{ .Version }}-arm64
+  - ghcr.io/juusujanar/{{ .ProjectName }}:{{ .Version }}-arm64
+  - janarj/{{ .ProjectName }}:{{ .Version }}-arm64
   use: buildx
   dockerfile: Dockerfile
   goos: linux
   goarch: arm64
   build_flag_templates:
-  - --platform=linux/arm64/v8
-  - --label=org.opencontainers.image.title=ttn-exporter
-  - --label=org.opencontainers.image.description=ttn-exporter
-  - --label=org.opencontainers.image.url=https://github.com/juusujanar/ttn-exporter
-  - --label=org.opencontainers.image.source=https://github.com/juusujanar/ttn-exporter
-  - --label=org.opencontainers.image.description="Prometheus exporter for The Things Network"
-  - --label=org.opencontainers.image.licenses=MIT
-  - --label=org.opencontainers.image.version={{ .Version }}
-  - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
-  - --label=org.opencontainers.image.revision={{ .FullCommit }}
+  - "--platform=linux/arm64/v8"
+  - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+  - "--label=org.opencontainers.image.description={{ .ProjectName }}"
+  - "--label=org.opencontainers.image.url=https://github.com/juusujanar/{{ .ProjectName }}"
+  - "--label=org.opencontainers.image.source=https://github.com/juusujanar/{{ .ProjectName }}"
+  - "--label=org.opencontainers.image.description="Prometheus exporter for The Things Network""
+  - "--label=org.opencontainers.image.licenses=MIT"
+  - "--label=org.opencontainers.image.version={{ .Version }}"
+  - "--label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}"
+  - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
 - image_templates:
-  - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv7
-  - janarj/ttn-exporter:{{ .Version }}-armv7
+  - ghcr.io/juusujanar/{{ .ProjectName }}:{{ .Version }}-armv7
+  - janarj/{{ .ProjectName }}:{{ .Version }}-armv7
   use: buildx
   dockerfile: Dockerfile
   goos: linux
   goarch: arm
   goarm: 7
   build_flag_templates:
-  - --platform=linux/arm/v7
-  - --label=org.opencontainers.image.title=ttn-exporter
-  - --label=org.opencontainers.image.description=ttn-exporter
-  - --label=org.opencontainers.image.url=https://github.com/juusujanar/ttn-exporter
-  - --label=org.opencontainers.image.source=https://github.com/juusujanar/ttn-exporter
-  - --label=org.opencontainers.image.description="Prometheus exporter for The Things Network"
-  - --label=org.opencontainers.image.licenses=MIT
-  - --label=org.opencontainers.image.version={{ .Version }}
-  - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
-  - --label=org.opencontainers.image.revision={{ .FullCommit }}
+  - "--platform=linux/arm/v7"
+  - "--label=org.opencontainers.image.title={{ .ProjectName }}r"
+  - "--label=org.opencontainers.image.description={{ .ProjectName }}r"
+  - "--label=org.opencontainers.image.url=https://github.com/juusujanar/{{ .ProjectName }}r"
+  - "--label=org.opencontainers.image.source=https://github.com/juusujanar/{{ .ProjectName }}r"
+  - "--label=org.opencontainers.image.description="Prometheus exporter for The Things Network""
+  - "--label=org.opencontainers.image.licenses=MIT"
+  - "--label=org.opencontainers.image.version={{ .Version }}"
+  - "--label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}"
+  - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
 
 docker_manifests:
-  - name_template: ghcr.io/juusujanar/ttn-exporter:{{ .Version }}
+  - name_template: ghcr.io/juusujanar/{{ .ProjectName }}:{{ .Version }}
     image_templates:
-      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-amd64
-      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64
-      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv7
-  - name_template: ghcr.io/juusujanar/ttn-exporter:latest
+      - ghcr.io/juusujanar/{{ .ProjectName }}:{{ .Version }}-amd64
+      - ghcr.io/juusujanar/{{ .ProjectName }}:{{ .Version }}-arm64
+      - ghcr.io/juusujanar/{{ .ProjectName }}:{{ .Version }}-armv7
+  - name_template: ghcr.io/juusujanar/{{ .ProjectName }}:latest
     image_templates:
-      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-amd64
-      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64
-      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv7
-  - name_template: janarj/ttn-exporter:{{ .Version }}
+      - ghcr.io/juusujanar/{{ .ProjectName }}:{{ .Version }}-amd64
+      - ghcr.io/juusujanar/{{ .ProjectName }}:{{ .Version }}-arm64
+      - ghcr.io/juusujanar/{{ .ProjectName }}:{{ .Version }}-armv7
+  - name_template: janarj/{{ .ProjectName }}:{{ .Version }}
     image_templates:
-      - janarj/ttn-exporter:{{ .Version }}-amd64
-      - janarj/ttn-exporter:{{ .Version }}-arm64
-      - janarj/ttn-exporter:{{ .Version }}-armv7
-  - name_template: janarj/ttn-exporter:latest
+      - janarj/{{ .ProjectName }}:{{ .Version }}-amd64
+      - janarj/{{ .ProjectName }}:{{ .Version }}-arm64
+      - janarj/{{ .ProjectName }}:{{ .Version }}-armv7
+  - name_template: janarj/{{ .ProjectName }}:latest
     image_templates:
-      - janarj/ttn-exporter:{{ .Version }}-amd64
-      - janarj/ttn-exporter:{{ .Version }}-arm64
-      - janarj/ttn-exporter:{{ .Version }}-armv7
+      - janarj/{{ .ProjectName }}:{{ .Version }}-amd64
+      - janarj/{{ .ProjectName }}:{{ .Version }}-arm64
+      - janarj/{{ .ProjectName }}:{{ .Version }}-armv7
 
 checksum:
   name_template: 'checksums.txt'
