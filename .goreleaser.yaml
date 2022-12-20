@@ -2,10 +2,7 @@
 # Make sure to check the documentation at https://goreleaser.com
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod tidy
-    # you may remove this if you don't need go generate
-    - go generate ./...
 
 builds:
   - env:
@@ -38,6 +35,12 @@ dockers:
   goarch: amd64
   build_flag_templates:
   - --platform=linux/amd64
+  - --label=org.opencontainers.image.title=ttn-exporter
+  - --label=org.opencontainers.image.description=ttn-exporter
+  - --label=org.opencontainers.image.url=https://github.com/juusujanar/ttn-exporter
+  - --label=org.opencontainers.image.source=https://github.com/juusujanar/ttn-exporter
+  - --label=org.opencontainers.image.description="Prometheus exporter for The Things Network"
+  - --label=org.opencontainers.image.licenses=MIT
   - --label=org.opencontainers.image.version={{ .Version }}
   - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
   - --label=org.opencontainers.image.revision={{ .FullCommit }}
@@ -50,6 +53,12 @@ dockers:
   goarch: arm64
   build_flag_templates:
   - --platform=linux/arm64/v8
+  - --label=org.opencontainers.image.title=ttn-exporter
+  - --label=org.opencontainers.image.description=ttn-exporter
+  - --label=org.opencontainers.image.url=https://github.com/juusujanar/ttn-exporter
+  - --label=org.opencontainers.image.source=https://github.com/juusujanar/ttn-exporter
+  - --label=org.opencontainers.image.description="Prometheus exporter for The Things Network"
+  - --label=org.opencontainers.image.licenses=MIT
   - --label=org.opencontainers.image.version={{ .Version }}
   - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
   - --label=org.opencontainers.image.revision={{ .FullCommit }}
@@ -63,6 +72,12 @@ dockers:
   goarm: 7
   build_flag_templates:
   - --platform=linux/arm/v7
+  - --label=org.opencontainers.image.title=ttn-exporter
+  - --label=org.opencontainers.image.description=ttn-exporter
+  - --label=org.opencontainers.image.url=https://github.com/juusujanar/ttn-exporter
+  - --label=org.opencontainers.image.source=https://github.com/juusujanar/ttn-exporter
+  - --label=org.opencontainers.image.description="Prometheus exporter for The Things Network"
+  - --label=org.opencontainers.image.licenses=MIT
   - --label=org.opencontainers.image.version={{ .Version }}
   - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
   - --label=org.opencontainers.image.revision={{ .FullCommit }}

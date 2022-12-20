@@ -16,12 +16,6 @@ COPY ttn-exporter /ttn-exporter
 
 # Final stage: the running container.
 FROM scratch AS final
-LABEL org.opencontainers.image.title=ttn-exporter
-LABEL org.opencontainers.image.description=ttn-exporter
-LABEL org.opencontainers.image.url=https://github.com/juusujanar/ttn-exporter
-LABEL org.opencontainers.image.source=https://github.com/juusujanar/ttn-exporter
-LABEL org.opencontainers.image.description="Prometheus exporter for The Things Network"
-LABEL org.opencontainers.image.licenses=MIT
 
 # Import the user and group files from the first stage.
 COPY --from=builder /user/group /user/passwd
