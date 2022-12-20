@@ -45,7 +45,7 @@ TTN_API_KEY=<key> ttn_exporter --ttn.uri="https://<tenant>.<region>.cloud.thethi
 To run the exporter as a Docker container, run:
 
 ```bash
-docker run -p 9981:9981 ghcr.io/juusujanar/ttn-exporter:v1.0.0 --ttn.uri="https://<tenant>.<region>.cloud.thethings.industries/" --ttn.api-key="<key>"
+docker run -p 9981:9981 -e TTN_API_KEY=<key> ghcr.io/juusujanar/ttn-exporter:v1.0.0 --ttn.uri="https://<tenant>.<region>.cloud.thethings.industries/"
 ```
 
 [docker hub]: https://hub.docker.com/r/janarj/ttn-exporter/
