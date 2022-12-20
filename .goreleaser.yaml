@@ -68,22 +68,22 @@ docker_manifests:
   - name_template: ghcr.io/juusujanar/ttn-exporter:{{ .Version }}
     image_templates:
       - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-amd64
-      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64v8
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64
       - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv7
   - name_template: ghcr.io/juusujanar/ttn-exporter:latest
     image_templates:
       - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-amd64
-      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64v8
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64
       - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv7
   - name_template: janarj/ttn-exporter:{{ .Version }}
     image_templates:
       - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-amd64
-      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64v8
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64
       - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv7
   - name_template: janarj/ttn-exporter:latest
     image_templates:
       - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-amd64
-      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64v8
+      - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-arm64
       - ghcr.io/juusujanar/ttn-exporter:{{ .Version }}-armv7
 
 checksum:
