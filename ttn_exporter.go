@@ -206,8 +206,9 @@ func main() {
 		_ = level.Error(logger).Log("msg", "Error creating an exporter", "err", err)
 		os.Exit(1)
 	}
-	prometheus.MustRegister(exporter)
-	prometheus.MustRegister(version.NewCollector("ttn_exporter"))
+	registry := prometheus.NewRegistry()
+	registry.MustRegister(exporter)
+	registry.MustRegister(version.NewCollector("ttn_exporter"))
 
 	http.Handle(*metricsPath, promhttp.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
