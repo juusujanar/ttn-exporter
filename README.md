@@ -10,7 +10,7 @@ Works with:
 ## Badges
 
 [![Release](https://img.shields.io/github/release/juusujanar/ttn-exporter.svg?style=for-the-badge)](https://github.com/juusujanar/ttn-exporter/releases/latest)
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=for-the-badge)](/LICENSE.md)
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=for-the-badge)](/LICENSE)
 [![Build status](https://img.shields.io/github/actions/workflow/status/juusujanar/ttn-exporter/release.yml?style=for-the-badge&branch=main)](https://github.com/juusujanar/ttn-exporter/actions?workflow=Release)
 [![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=for-the-badge)](http://godoc.org/github.com/juusujanar/ttn-exporter)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=for-the-badge)](https://conventionalcommits.org)
