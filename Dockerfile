@@ -1,4 +1,4 @@
-FROM golang:1.21 AS builder
+FROM golang:1.22 AS builder
 WORKDIR /app
 
 # Install the Certificate-Authority certificates for the app to be able to make
