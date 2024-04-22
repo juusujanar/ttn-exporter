@@ -87,7 +87,7 @@ func NewExporter(uri string, apiKey string, sslVerify bool, timeout time.Duratio
 	if !strings.HasPrefix(uri, "https://") && !strings.HasPrefix(uri, "http://") {
 		return nil, errors.New("invalid URI scheme")
 	}
-	/* #nosec G402 -- allow insecure TLS when requested by user */
+
 	return &Exporter{
 		URI:    uri,
 		apiKey: apiKey,
@@ -95,7 +95,7 @@ func NewExporter(uri string, apiKey string, sslVerify bool, timeout time.Duratio
 			Timeout: timeout,
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{
-					InsecureSkipVerify: !sslVerify,
+					InsecureSkipVerify: !sslVerify, // #nosec G402 -- allow insecure TLS when requested by user
 				},
 			},
 		},
