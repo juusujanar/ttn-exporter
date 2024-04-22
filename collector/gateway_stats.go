@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"time"
-
-	"github.com/go-kit/log"
 )
 
 type Duration struct {
@@ -36,6 +34,7 @@ func (d *Duration) UnmarshalJSON(b []byte) error {
 }
 
 type GatewayStatsResponse struct {
+	Code       int    `json:"code"`
 	Protocol   string `json:"protocol"`
 	LastStatus struct {
 		Time     time.Time `json:"time"`
@@ -46,14 +45,14 @@ type GatewayStatsResponse struct {
 			Platform             *string `json:"platform"`
 			Station              *string `json:"station"`
 		} `json:"versions"`
-		IP      string `json:"ip"`
+		IP      []string `json:"ip"`
 		Metrics struct {
-			Ackr int64 `json:"ackr"`
-			TxIn int64 `json:"txin"`
-			TxOk int64 `json:"txok"`
-			RxIn int64 `json:"rxin"`
-			RxOk int64 `json:"rxok"`
-			RxFw int64 `json:"rxfw"`
+			Ackr float64 `json:"ackr"`
+			TxIn float64 `json:"txin"`
+			TxOk float64 `json:"txok"`
+			RxIn float64 `json:"rxin"`
+			RxOk float64 `json:"rxok"`
+			RxFw float64 `json:"rxfw"`
 		} `json:"metrics"`
 	} `json:"last_status"`
 	UplinkCount            string `json:"uplink_count"`
@@ -70,7 +69,7 @@ type GatewayStatsResponse struct {
 	} `json:"gateway_remote_address"`
 }
 
-func getGatewayStats(client *http.Client, uri string, apiKey string, gatewayID string, logger log.Logger) (*GatewayStatsResponse, error) {
+func getGatewayStats(client *http.Client, uri string, apiKey string, gatewayID string) (*GatewayStatsResponse, error) {
 	u, err := url.Parse(uri)
 	if err != nil {
 		return nil, err
@@ -108,6 +107,10 @@ func getGatewayStats(client *http.Client, uri string, apiKey string, gatewayID s
 	err = json.Unmarshal(body, &gatewayStats)
 	if err != nil {
 		return nil, err
+	}
+
+	if gatewayStats.Code != 0 {
+		return nil, fmt.Errorf("Gateway stats response code is %d", gatewayStats.Code)
 	}
 
 	return gatewayStats, nil

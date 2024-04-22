@@ -6,8 +6,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-
-	"github.com/go-kit/log"
 )
 
 type Gateway struct {
@@ -22,7 +20,7 @@ type GatewayListResponse struct {
 	Gateways []Gateway `json:"gateways"`
 }
 
-func getGatewayList(client *http.Client, uri string, apiKey string, logger log.Logger) ([]Gateway, error) {
+func getGatewayList(client *http.Client, uri string, apiKey string) (*[]Gateway, error) {
 	u, err := url.Parse(uri)
 	if err != nil {
 		return nil, err
@@ -63,5 +61,5 @@ func getGatewayList(client *http.Client, uri string, apiKey string, logger log.L
 		return nil, err
 	}
 
-	return gatewayList.Gateways, nil
+	return &gatewayList.Gateways, nil
 }
