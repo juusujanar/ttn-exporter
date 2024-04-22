@@ -46,6 +46,11 @@ var (
 		"Number of downlink packets sent by gateway",
 		[]string{"gateway_id", "name"}, nil,
 	)
+	txAcknowledgementCount = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "gateway", "tx_acknowledgement_count"),
+		"Number of TX acknowledgements received by gateway",
+		[]string{"gateway_id", "name"}, nil,
+	)
 	roundTripMin = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "gateway", "round_trip_min"),
 		"Minimum measured round trip time between gateway and TTN in seconds",
@@ -145,10 +150,21 @@ func (e *Exporter) scrape(ch chan<- prometheus.Metric) (up float64) {
 	for _, gw := range data {
 		if gw.Stats != nil {
 			ch <- prometheus.MustNewConstMetric(gatewayConnected, prometheus.GaugeValue, BoolToFloat(gw.Connected), gw.GatewayID, gw.Name)
-			uplinkCountFloat, _ := strconv.ParseFloat(gw.Stats.UplinkCount, 64)
-			downlinkCountFloat, _ := strconv.ParseFloat(gw.Stats.DownlinkCount, 64)
+			uplinkCountFloat, err := strconv.ParseFloat(gw.Stats.UplinkCount, 64)
+			if err != nil {
+				_ = level.Error(e.logger).Log("msg", "Failed to convert UplinkCount to float64", "err", err)
+			}
+			downlinkCountFloat, err := strconv.ParseFloat(gw.Stats.DownlinkCount, 64)
+			if err != nil {
+				_ = level.Error(e.logger).Log("msg", "Failed to convert DownlinkCount to float64", "err", err)
+			}
+			txAcknowledgementCountFloat, err := strconv.ParseFloat(gw.Stats.TxAcknowledgementCount, 64)
+			if err != nil {
+				_ = level.Error(e.logger).Log("msg", "Failed to convert TxAcknowledgementCount to float64", "err", err)
+			}
 			ch <- prometheus.MustNewConstMetric(uplinkCount, prometheus.CounterValue, uplinkCountFloat, gw.GatewayID, gw.Name)
 			ch <- prometheus.MustNewConstMetric(downlinkCount, prometheus.CounterValue, downlinkCountFloat, gw.GatewayID, gw.Name)
+			ch <- prometheus.MustNewConstMetric(txAcknowledgementCount, prometheus.CounterValue, txAcknowledgementCountFloat, gw.GatewayID, gw.Name)
 			ch <- prometheus.MustNewConstMetric(roundTripMin, prometheus.GaugeValue, gw.Stats.RoundTripTimes.Min.Seconds(), gw.GatewayID, gw.Name)
 			ch <- prometheus.MustNewConstMetric(roundTripMax, prometheus.GaugeValue, gw.Stats.RoundTripTimes.Max.Seconds(), gw.GatewayID, gw.Name)
 			ch <- prometheus.MustNewConstMetric(roundTripMedian, prometheus.GaugeValue, gw.Stats.RoundTripTimes.Median.Seconds(), gw.GatewayID, gw.Name)
@@ -163,8 +179,13 @@ func (e *Exporter) scrape(ch chan<- prometheus.Metric) (up float64) {
 func (e *Exporter) parseVersion(ch chan<- prometheus.Metric, data []collector.GatewayData) {
 	for _, gw := range data {
 		if gw.Stats != nil {
-			ch <- prometheus.MustNewConstMetric(ttnInfo, prometheus.GaugeValue, 1, gw.Stats.LastStatus.Versions.GatewayServerVersion)
-			return
+			if gw.Stats.LastStatus.Versions.GatewayServerVersion != nil {
+				ch <- prometheus.MustNewConstMetric(ttnInfo, prometheus.GaugeValue, 1, *gw.Stats.LastStatus.Versions.GatewayServerVersion)
+				return
+			} else if gw.Stats.LastStatus.Versions.Firmware != nil {
+				ch <- prometheus.MustNewConstMetric(ttnInfo, prometheus.GaugeValue, 1, *gw.Stats.LastStatus.Versions.Firmware)
+				return
+			}
 		}
 	}
 }

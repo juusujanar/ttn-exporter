@@ -36,10 +36,17 @@ func (d *Duration) UnmarshalJSON(b []byte) error {
 }
 
 type GatewayStatsResponse struct {
+	Protocol   string `json:"protocol"`
 	LastStatus struct {
+		Time     time.Time `json:"time"`
 		Versions struct {
-			GatewayServerVersion string `json:"ttn-lw-gateway-server"`
+			GatewayServerVersion *string `json:"ttn-lw-gateway-server"`
+			Firmware             *string `json:"firmware"`
+			Package              *string `json:"package"`
+			Platform             *string `json:"platform"`
+			Station              *string `json:"station"`
 		} `json:"versions"`
+		IP      string `json:"ip"`
 		Metrics struct {
 			Ackr int64 `json:"ackr"`
 			TxIn int64 `json:"txin"`
@@ -49,14 +56,18 @@ type GatewayStatsResponse struct {
 			RxFw int64 `json:"rxfw"`
 		} `json:"metrics"`
 	} `json:"last_status"`
-	UplinkCount    string `json:"uplink_count"`
-	DownlinkCount  string `json:"downlink_count"`
-	RoundTripTimes struct {
+	UplinkCount            string `json:"uplink_count"`
+	DownlinkCount          string `json:"downlink_count"`
+	TxAcknowledgementCount string `json:"tx_acknowledgement_count"`
+	RoundTripTimes         *struct {
 		Min    Duration `json:"min"`
 		Max    Duration `json:"max"`
 		Median Duration `json:"median"`
 		Count  int64    `json:"count"`
 	} `json:"round_trip_times"`
+	GatewayRemoteAddress struct {
+		IP string `json:"ip"`
+	} `json:"gateway_remote_address"`
 }
 
 func getGatewayStats(client *http.Client, uri string, apiKey string, gatewayID string, logger log.Logger) (*GatewayStatsResponse, error) {
