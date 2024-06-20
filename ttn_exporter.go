@@ -16,6 +16,7 @@ import (
 	"github.com/juusujanar/ttn-exporter/collector"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
+	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/promlog"
 	"github.com/prometheus/common/promlog/flag"
@@ -243,7 +244,7 @@ func main() {
 	registry.MustRegister(
 		collectors.NewGoCollector(),
 		exporter,
-		version.NewCollector("ttn_exporter"),
+		versioncollector.NewCollector("ttn_exporter"),
 	)
 
 	http.Handle(*metricsPath, promhttp.HandlerFor(registry, promhttp.HandlerOpts{Registry: registry}))
