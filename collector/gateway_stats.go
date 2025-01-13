@@ -34,8 +34,9 @@ func (d *Duration) UnmarshalJSON(b []byte) error {
 }
 
 type GatewayStatsResponse struct {
-	Code       int    `json:"code"`
-	Protocol   string `json:"protocol"`
+	Code       int     `json:"code"`
+	Message    *string `json:"message"` // This field contains the error message, optional
+	Protocol   string  `json:"protocol"`
 	LastStatus struct {
 		Time     time.Time `json:"time"`
 		Versions struct {
@@ -99,14 +100,17 @@ func getGatewayStats(client *http.Client, uri string, apiKey string, gatewayID s
 		return nil, err
 	}
 
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("HTTP status %d on getting gateway stats", res.StatusCode)
-	}
-
 	var gatewayStats *GatewayStatsResponse
 	err = json.Unmarshal(body, &gatewayStats)
 	if err != nil {
 		return nil, err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		if gatewayStats.Message != nil {
+			return nil, fmt.Errorf("HTTP status %d on getting gateway stats, error: %v", res.StatusCode, *gatewayStats.Message)
+		}
+		return nil, fmt.Errorf("HTTP status %d on getting gateway stats", res.StatusCode)
 	}
 
 	if gatewayStats.Code != 0 {
