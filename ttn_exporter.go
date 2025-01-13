@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"errors"
+	"log/slog"
 	"net/http"
 	_ "net/http/pprof" // #nosec G108 profiling error
 	"os"
@@ -11,15 +12,13 @@ import (
 	"time"
 
 	"github.com/alecthomas/kingpin/v2"
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"github.com/juusujanar/ttn-exporter/collector"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/prometheus/common/promlog"
-	"github.com/prometheus/common/promlog/flag"
+	"github.com/prometheus/common/promslog"
+	"github.com/prometheus/common/promslog/flag"
 	"github.com/prometheus/common/version"
 	"github.com/prometheus/exporter-toolkit/web"
 	webflag "github.com/prometheus/exporter-toolkit/web/kingpinflag"
@@ -86,11 +85,11 @@ type Exporter struct {
 	client       *http.Client
 	up           prometheus.Gauge
 	totalScrapes prometheus.Counter
-	logger       log.Logger
+	logger       *slog.Logger
 }
 
 // NewExporter returns an initialized Exporter.
-func NewExporter(uri string, apiKey string, sslVerify bool, timeout time.Duration, logger log.Logger) (*Exporter, error) {
+func NewExporter(uri string, apiKey string, sslVerify bool, timeout time.Duration, logger *slog.Logger) (*Exporter, error) {
 	if !strings.HasPrefix(uri, "https://") && !strings.HasPrefix(uri, "http://") {
 		return nil, errors.New("invalid URI scheme")
 	}
@@ -143,7 +142,7 @@ func (e *Exporter) scrape(ch chan<- prometheus.Metric) (up float64) {
 	var err error
 	data, err := collector.GetInfo(e.client, e.URI, e.apiKey, e.logger)
 	if err != nil {
-		_ = level.Error(e.logger).Log("msg", "Can't scrape TTN", "err", err)
+		e.logger.Error("Can't scrape TTN", "err", err)
 		return 0
 	}
 
@@ -155,7 +154,7 @@ func (e *Exporter) scrape(ch chan<- prometheus.Metric) (up float64) {
 			if gw.Stats.UplinkCount != "" {
 				uplinkCountFloat, err := strconv.ParseFloat(gw.Stats.UplinkCount, 64)
 				if err != nil {
-					_ = level.Error(e.logger).Log("msg", "Failed to convert UplinkCount to float64", "err", err, "value", gw.Stats.UplinkCount)
+					e.logger.Error("Failed to convert UplinkCount to float64", "err", err.Error(), "value", gw.Stats.UplinkCount)
 				}
 				ch <- prometheus.MustNewConstMetric(uplinkCount, prometheus.CounterValue, uplinkCountFloat, gw.GatewayID, gw.Name)
 			}
@@ -163,7 +162,7 @@ func (e *Exporter) scrape(ch chan<- prometheus.Metric) (up float64) {
 			if gw.Stats.DownlinkCount != "" {
 				downlinkCountFloat, err := strconv.ParseFloat(gw.Stats.DownlinkCount, 64)
 				if err != nil {
-					_ = level.Error(e.logger).Log("msg", "Failed to convert DownlinkCount to float64", "err", err, "value", gw.Stats.DownlinkCount)
+					e.logger.Error("Failed to convert DownlinkCount to float64", "err", err.Error(), "value", gw.Stats.DownlinkCount)
 				}
 				ch <- prometheus.MustNewConstMetric(downlinkCount, prometheus.CounterValue, downlinkCountFloat, gw.GatewayID, gw.Name)
 			}
@@ -171,7 +170,7 @@ func (e *Exporter) scrape(ch chan<- prometheus.Metric) (up float64) {
 			if gw.Stats.TxAcknowledgementCount != "" {
 				txAcknowledgementCountFloat, err := strconv.ParseFloat(gw.Stats.TxAcknowledgementCount, 64)
 				if err != nil {
-					_ = level.Error(e.logger).Log("msg", "Failed to convert TxAcknowledgementCount to float64", "err", err, "value", gw.Stats.TxAcknowledgementCount)
+					e.logger.Error("Failed to convert TxAcknowledgementCount to float64", "err", err.Error(), "value", gw.Stats.TxAcknowledgementCount)
 				}
 				ch <- prometheus.MustNewConstMetric(txAcknowledgementCount, prometheus.CounterValue, txAcknowledgementCountFloat, gw.GatewayID, gw.Name)
 			}
@@ -219,25 +218,25 @@ func main() {
 		ttnTimeout   = kingpin.Flag("ttn.timeout", "Timeout for trying to get stats from TTN API.").Default("5s").Duration()
 	)
 
-	promlogConfig := &promlog.Config{}
+	promlogConfig := &promslog.Config{}
 	flag.AddFlags(kingpin.CommandLine, promlogConfig)
 	kingpin.Version(version.Print("ttn_exporter"))
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
-	logger := promlog.New(promlogConfig)
+	logger := promslog.New(promlogConfig)
 
-	_ = level.Info(logger).Log("msg", "Starting ttn_exporter", "version", version.Info())
-	_ = level.Info(logger).Log("msg", "Build context", "context", version.BuildContext())
+	logger.Info("Starting ttn_exporter", "version", version.Info())
+	logger.Info("Build context", "context", version.BuildContext())
 
 	ttnAPIKey := os.Getenv(envThingsNetworkAPIToken)
 	if ttnAPIKey == "" {
-		_ = level.Error(logger).Log("msg", "TTN API key not set as environment variable", "variable", envThingsNetworkAPIToken)
+		logger.Error("TTN API key not set as environment variable", "variable", envThingsNetworkAPIToken)
 		os.Exit(1)
 	}
 
 	exporter, err := NewExporter(*ttnURI, ttnAPIKey, *ttnSSLVerify, *ttnTimeout, logger)
 	if err != nil {
-		_ = level.Error(logger).Log("msg", "Error creating an exporter", "err", err)
+		logger.Error("Error creating an exporter", "err", err.Error())
 		os.Exit(1)
 	}
 	registry := prometheus.NewRegistry()
@@ -263,7 +262,7 @@ func main() {
 		ReadHeaderTimeout: 1 * time.Second,
 	}
 	if err := web.ListenAndServe(srv, webConfig, logger); err != nil {
-		_ = level.Error(logger).Log("msg", "Error starting HTTP server", "err", err)
+		logger.Error("Error starting HTTP server", "err", err.Error())
 		os.Exit(1)
 	}
 }
