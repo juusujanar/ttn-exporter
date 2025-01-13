@@ -1,6 +1,6 @@
 {
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
   "prHourlyLimit": 0,
   "prConcurrentLimit": 0,
@@ -8,7 +8,8 @@
   "schedule": [
     "before 8am"
   ],
-  "packageRules": [{
+  "packageRules": [
+    {
       "matchUpdateTypes": [
         "minor",
         "patch",
