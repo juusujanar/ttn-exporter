@@ -1,10 +1,8 @@
 package collector
 
 import (
+	"log/slog"
 	"net/http"
-
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 )
 
 const userAgent = "ttn-prometheus-exporter/1.0.0"
@@ -16,7 +14,7 @@ type GatewayData struct {
 	Stats     *GatewayStatsResponse
 }
 
-func GetInfo(client *http.Client, uri string, apiKey string, logger log.Logger) ([]GatewayData, error) {
+func GetInfo(client *http.Client, uri string, apiKey string, logger *slog.Logger) ([]GatewayData, error) {
 	gateways, err := getGatewayList(client, uri, apiKey)
 	if err != nil {
 		return nil, err
@@ -27,7 +25,7 @@ func GetInfo(client *http.Client, uri string, apiKey string, logger log.Logger) 
 		gatewayID := gateway.IDs.GatewayID
 		gatewayStats, err := getGatewayStats(client, uri, apiKey, gatewayID)
 		if err != nil {
-			_ = level.Warn(logger).Log("msg", "Failed to scrape gateway", "gatewayID", gatewayID, "err", err)
+			logger.Warn("Failed to scrape gateway", "gatewayID", gatewayID, "err", err.Error())
 		}
 		connected := err == nil
 		allStats = append(allStats, GatewayData{
