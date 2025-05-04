@@ -1,10 +1,6 @@
+version: "2"
 run:
   modules-download-mode: readonly
-
-issues:
-  exclude-dirs:
-    - vendor
-
 linters:
   enable:
     - gosec

@@ -64,7 +64,7 @@ func newTTNServer(t *testing.T) *httptest.Server {
 }
 
 func expectMetrics(t *testing.T, c prometheus.Collector, fixture string) {
-	_, err := os.Open(path.Join("test", fixture))
+	_, err := os.Open(path.Join("test", fixture)) // #nosec G304 Potential file inclusion via variable
 	if err != nil {
 		t.Fatalf("Error opening fixture file %q: %v", fixture, err)
 	}
