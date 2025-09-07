@@ -2,7 +2,7 @@ module github.com/juusujanar/ttn-exporter
 
 go 1.23.0
 
-toolchain go1.25.0
+toolchain go1.25.1
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
