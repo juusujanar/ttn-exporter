@@ -40,8 +40,15 @@ Help on flags:
 
 ### API keys
 
-To use this exporter, you need to generate an API key and grant it the following rights:
-- **List the gateways the organization is a collaborator of** - required when consuming organization gateways
+To use this exporter, you need to generate a user or an organization API key. Gateway API keys do not work currently, because the exporter needs permissions
+to dynamically load a list of all available gateways (currently limited up to 100 gateways).
+
+When you create an organization API key, you must grant it the following rights:
+- **List the gateways the organization is a collaborator of** - required to get a list of gateways
+- **View gateway status** - to get gateway status and metrics
+
+When you create a user API key, you must grant it the following rights:
+- **List the gateways the user is a collaborator of** - required to get a list of gateways
 - **View gateway status** - to get gateway status and metrics
 
 ### TTN URL
