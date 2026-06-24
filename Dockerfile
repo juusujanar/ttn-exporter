@@ -1,4 +1,6 @@
-FROM golang:1.26@sha256:792443b89f65105abba56b9bd5e97f680a80074ac62fc844a584212f8c8102c3 AS builder
+FROM golang:1.26 AS builder
+ARG TARGETPLATFORM
+
 WORKDIR /app
 
 # Install the Certificate-Authority certificates for the app to be able to make
@@ -12,7 +14,7 @@ RUN mkdir /user && \
   echo 'nobody:x:65534:' > /user/group
 
 # Goreleaser uses the already built binaries, so we just need to copy
-COPY ttn-exporter /ttn-exporter
+COPY $TARGETPLATFORM/ttn-exporter /ttn-exporter
 
 # Final stage: the running container.
 FROM scratch AS final
