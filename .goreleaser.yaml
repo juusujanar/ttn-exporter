@@ -1,12 +1,8 @@
-# This is an example .yml file with some sensible defaults.
-# Make sure to check the documentation at https://goreleaser.com
-before:
-  hooks:
-    - go mod tidy
+version: 2
 
+project_name: ttn-exporter
 builds:
-  - env:
-      - CGO_ENABLED=0
+  - env: [CGO_ENABLED=0]
     goos:
       - linux
       - windows
@@ -18,84 +14,24 @@ builds:
     goarm:
       - "7"
 
-dockers:
-- image_templates:
-  - ghcr.io/juusujanar/{{ .ProjectName }}:v{{ .Version }}-amd64
-  - janarj/{{ .ProjectName }}:v{{ .Version }}-amd64
-  use: buildx
-  dockerfile: Dockerfile
-  goos: linux
-  goarch: amd64
-  build_flag_templates:
-  - --platform=linux/amd64
-  - --label=org.opencontainers.image.title={{ .ProjectName }}
-  - --label=org.opencontainers.image.description={{ .ProjectName }}
-  - --label=org.opencontainers.image.url=https://github.com/juusujanar/{{ .ProjectName }}
-  - --label=org.opencontainers.image.source=https://github.com/juusujanar/{{ .ProjectName }}
-  - --label=org.opencontainers.image.description='Prometheus exporter for The Things Network'
-  - --label=org.opencontainers.image.licenses=MIT
-  - --label=org.opencontainers.image.version={{ .Version }}
-  - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
-  - --label=org.opencontainers.image.revision={{ .FullCommit }}
-- image_templates:
-  - ghcr.io/juusujanar/{{ .ProjectName }}:v{{ .Version }}-arm64
-  - janarj/{{ .ProjectName }}:v{{ .Version }}-arm64
-  use: buildx
-  dockerfile: Dockerfile
-  goos: linux
-  goarch: arm64
-  build_flag_templates:
-  - --platform=linux/arm64/v8
-  - --label=org.opencontainers.image.title={{ .ProjectName }}
-  - --label=org.opencontainers.image.description={{ .ProjectName }}
-  - --label=org.opencontainers.image.url=https://github.com/juusujanar/{{ .ProjectName }}
-  - --label=org.opencontainers.image.source=https://github.com/juusujanar/{{ .ProjectName }}
-  - --label=org.opencontainers.image.description='Prometheus exporter for The Things Network'
-  - --label=org.opencontainers.image.licenses=MIT
-  - --label=org.opencontainers.image.version={{ .Version }}
-  - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
-  - --label=org.opencontainers.image.revision={{ .FullCommit }}
-- image_templates:
-  - ghcr.io/juusujanar/{{ .ProjectName }}:v{{ .Version }}-armv7
-  - janarj/{{ .ProjectName }}:v{{ .Version }}-armv7
-  use: buildx
-  dockerfile: Dockerfile
-  goos: linux
-  goarch: arm
-  goarm: 7
-  build_flag_templates:
-  - --platform=linux/arm/v7
-  - --label=org.opencontainers.image.title={{ .ProjectName }}r
-  - --label=org.opencontainers.image.description={{ .ProjectName }}r
-  - --label=org.opencontainers.image.url=https://github.com/juusujanar/{{ .ProjectName }}r
-  - --label=org.opencontainers.image.source=https://github.com/juusujanar/{{ .ProjectName }}r
-  - --label=org.opencontainers.image.description='Prometheus exporter for The Things Network'
-  - --label=org.opencontainers.image.licenses=MIT
-  - --label=org.opencontainers.image.version={{ .Version }}
-  - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
-  - --label=org.opencontainers.image.revision={{ .FullCommit }}
-
-docker_manifests:
-  - name_template: ghcr.io/juusujanar/{{ .ProjectName }}:v{{ .Version }}
-    image_templates:
-      - ghcr.io/juusujanar/{{ .ProjectName }}:v{{ .Version }}-amd64
-      - ghcr.io/juusujanar/{{ .ProjectName }}:v{{ .Version }}-arm64
-      - ghcr.io/juusujanar/{{ .ProjectName }}:v{{ .Version }}-armv7
-  - name_template: ghcr.io/juusujanar/{{ .ProjectName }}:latest
-    image_templates:
-      - ghcr.io/juusujanar/{{ .ProjectName }}:v{{ .Version }}-amd64
-      - ghcr.io/juusujanar/{{ .ProjectName }}:v{{ .Version }}-arm64
-      - ghcr.io/juusujanar/{{ .ProjectName }}:v{{ .Version }}-armv7
-  - name_template: janarj/{{ .ProjectName }}:v{{ .Version }}
-    image_templates:
-      - janarj/{{ .ProjectName }}:v{{ .Version }}-amd64
-      - janarj/{{ .ProjectName }}:v{{ .Version }}-arm64
-      - janarj/{{ .ProjectName }}:v{{ .Version }}-armv7
-  - name_template: janarj/{{ .ProjectName }}:latest
-    image_templates:
-      - janarj/{{ .ProjectName }}:v{{ .Version }}-amd64
-      - janarj/{{ .ProjectName }}:v{{ .Version }}-arm64
-      - janarj/{{ .ProjectName }}:v{{ .Version }}-armv7
+dockers_v2:
+  - images:
+      - "ghcr.io/juusujanar/{{ .ProjectName }}"
+      - "janarj/{{ .ProjectName }}"
+    tags:
+      - "v{{ .Version }}"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+      - linux/arm/v7
+    dockerfile: Dockerfile
+    labels:
+      "org.opencontainers.image.description": "Things Stack Prometheus exporter"
+      "org.opencontainers.image.created": "{{.Date}}"
+      "org.opencontainers.image.name": "{{.ProjectName}}"
+      "org.opencontainers.image.revision": "{{.FullCommit}}"
+      "org.opencontainers.image.version": "{{.Version}}"
+      "org.opencontainers.image.source": "{{.GitURL}}"
 
 checksum:
   name_template: 'checksums.txt'
