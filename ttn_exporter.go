@@ -82,26 +82,31 @@ var (
 type Exporter struct {
 	URI          string
 	apiKey       string
+	concurrency  int
 	client       *http.Client
 	totalScrapes prometheus.Counter
 	logger       *slog.Logger
 }
 
 // NewExporter returns an initialized Exporter.
-func NewExporter(uri string, apiKey string, sslVerify bool, timeout time.Duration, logger *slog.Logger) (*Exporter, error) {
+func NewExporter(uri string, apiKey string, sslVerify bool, timeout time.Duration, concurrency int, logger *slog.Logger) (*Exporter, error) {
 	if !strings.HasPrefix(uri, "https://") && !strings.HasPrefix(uri, "http://") {
 		return nil, errors.New("invalid URI scheme")
 	}
 
 	return &Exporter{
-		URI:    uri,
-		apiKey: apiKey,
+		URI:         uri,
+		apiKey:      apiKey,
+		concurrency: concurrency,
 		client: &http.Client{
 			Timeout: timeout,
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{
 					InsecureSkipVerify: !sslVerify, // #nosec G402 -- allow insecure TLS when requested by user
 				},
+				// Keep enough idle connections around for concurrent gateway
+				// stats fetches to reuse, instead of reconnecting per request.
+				MaxIdleConnsPerHost: concurrency,
 			},
 		},
 		totalScrapes: prometheus.NewCounter(prometheus.CounterOpts{
@@ -135,7 +140,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 func (e *Exporter) scrape(ch chan<- prometheus.Metric) (up float64) {
 	e.totalScrapes.Inc()
 	var err error
-	data, err := collector.GetInfo(e.client, e.URI, e.apiKey, e.logger)
+	data, err := collector.GetInfo(e.client, e.URI, e.apiKey, e.concurrency, e.logger)
 	if err != nil {
 		e.logger.Error("Can't scrape TTN", "err", err)
 		return 0
@@ -209,11 +214,12 @@ func boolToFloat(b bool) float64 {
 
 func main() {
 	var (
-		webConfig    = webflag.AddFlags(kingpin.CommandLine, ":9981")
-		metricsPath  = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
-		ttnURI       = kingpin.Flag("ttn.uri", "URI on which Things Stack is used.").Default("https://eu1.cloud.thethings.network/").String()
-		ttnSSLVerify = kingpin.Flag("ttn.ssl-verify", "Flag that enables SSL certificate verification to the TTN API URI").Default("true").Bool()
-		ttnTimeout   = kingpin.Flag("ttn.timeout", "Timeout for trying to get stats from TTN API.").Default("5s").Duration()
+		webConfig      = webflag.AddFlags(kingpin.CommandLine, ":9981")
+		metricsPath    = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
+		ttnURI         = kingpin.Flag("ttn.uri", "URI on which Things Stack is used.").Default("https://eu1.cloud.thethings.network/").String()
+		ttnSSLVerify   = kingpin.Flag("ttn.ssl-verify", "Flag that enables SSL certificate verification to the TTN API URI").Default("true").Bool()
+		ttnTimeout     = kingpin.Flag("ttn.timeout", "Timeout for trying to get stats from TTN API.").Default("5s").Duration()
+		ttnConcurrency = kingpin.Flag("ttn.concurrency", "Maximum number of concurrent gateway stats requests to the TTN API. TTN rate limits are undocumented; lower this if you see rate-limit warnings in the logs.").Default("5").Int()
 	)
 
 	promlogConfig := &promslog.Config{}
@@ -232,7 +238,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	exporter, err := NewExporter(*ttnURI, ttnAPIKey, *ttnSSLVerify, *ttnTimeout, logger)
+	exporter, err := NewExporter(*ttnURI, ttnAPIKey, *ttnSSLVerify, *ttnTimeout, *ttnConcurrency, logger)
 	if err != nil {
 		logger.Error("Error creating an exporter", "err", err.Error())
 		os.Exit(1)

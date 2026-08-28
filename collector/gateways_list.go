@@ -4,9 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
+	"strconv"
 )
+
+const gatewayListPageSize = 100
 
 type Gateway struct {
 	IDs struct {
@@ -20,14 +24,34 @@ type GatewayListResponse struct {
 	Gateways []Gateway `json:"gateways"`
 }
 
-func getGatewayList(client *http.Client, uri string, apiKey string) (*[]Gateway, error) {
+// getGatewayList fetches all gateways, following pagination until a page
+// comes back shorter than gatewayListPageSize.
+func getGatewayList(client *http.Client, uri string, apiKey string, logger *slog.Logger) ([]Gateway, error) {
+	var all []Gateway
+	for page := 1; ; page++ {
+		gateways, err := getGatewayListPage(client, uri, apiKey, page, logger)
+		if err != nil {
+			return nil, err
+		}
+		all = append(all, gateways...)
+		if len(gateways) < gatewayListPageSize {
+			return all, nil
+		}
+	}
+}
+
+func getGatewayListPage(client *http.Client, uri string, apiKey string, page int, logger *slog.Logger) ([]Gateway, error) {
 	u, err := url.Parse(uri)
 	if err != nil {
 		return nil, err
 	}
 
 	u.Path = "/api/v3/gateways"
-	u.RawQuery = "limit=100&field_mask=name" // Include gateway name in the response
+	query := url.Values{}
+	query.Set("limit", strconv.Itoa(gatewayListPageSize))
+	query.Set("page", strconv.Itoa(page))
+	query.Set("field_mask", "name") // Include gateway name in the response
+	u.RawQuery = query.Encode()
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
@@ -37,7 +61,7 @@ func getGatewayList(client *http.Client, uri string, apiKey string) (*[]Gateway,
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 
-	res, err := client.Do(req)
+	res, err := doWithRateLimitRetry(client, req, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +76,7 @@ func getGatewayList(client *http.Client, uri string, apiKey string) (*[]Gateway,
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("HTTP status %d on getting gateway list", res.StatusCode)
+		return nil, fmt.Errorf("HTTP status %d on getting gateway list (page %d)", res.StatusCode, page)
 	}
 
 	var gatewayList GatewayListResponse
@@ -61,5 +85,5 @@ func getGatewayList(client *http.Client, uri string, apiKey string) (*[]Gateway,
 		return nil, err
 	}
 
-	return &gatewayList.Gateways, nil
+	return gatewayList.Gateways, nil
 }
