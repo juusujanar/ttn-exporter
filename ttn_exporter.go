@@ -255,14 +255,6 @@ func main() {
 				Address: *metricsPath,
 				Text:    "Metrics",
 			},
-			{
-				Address: *ttnURI,
-				Text:    "Things Stack",
-			},
-			{
-				Address: "https://github.com/juusujanar/ttn-exporter",
-				Text:    "GitHub",
-			},
 		},
 	})
 	if err != nil {
