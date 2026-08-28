@@ -83,7 +83,6 @@ type Exporter struct {
 	URI          string
 	apiKey       string
 	client       *http.Client
-	up           prometheus.Gauge
 	totalScrapes prometheus.Counter
 	logger       *slog.Logger
 }
@@ -105,12 +104,8 @@ func NewExporter(uri string, apiKey string, sslVerify bool, timeout time.Duratio
 				},
 			},
 		},
-		up: prometheus.NewGauge(prometheus.GaugeOpts{
-			Name: "up",
-			Help: "Was the last scrape of TTN successful.",
-		}),
 		totalScrapes: prometheus.NewCounter(prometheus.CounterOpts{
-			Name: "exporter_scrapes_total",
+			Name: prometheus.BuildFQName(namespace, "exporter", "scrapes_total"),
 			Help: "Total number of scrapes.",
 		}),
 		logger: logger,
@@ -150,29 +145,32 @@ func (e *Exporter) scrape(ch chan<- prometheus.Metric) (up float64) {
 
 	for _, gw := range data {
 		if gw.Connected {
-			ch <- prometheus.MustNewConstMetric(gatewayConnected, prometheus.GaugeValue, BoolToFloat(gw.Connected), gw.GatewayID, gw.Name, gw.Stats.Protocol)
+			ch <- prometheus.MustNewConstMetric(gatewayConnected, prometheus.GaugeValue, boolToFloat(gw.Connected), gw.GatewayID, gw.Name, gw.Stats.Protocol)
 			if gw.Stats.UplinkCount != "" {
 				uplinkCountFloat, err := strconv.ParseFloat(gw.Stats.UplinkCount, 64)
 				if err != nil {
 					e.logger.Error("Failed to convert UplinkCount to float64", "err", err.Error(), "value", gw.Stats.UplinkCount)
+				} else {
+					ch <- prometheus.MustNewConstMetric(uplinkCount, prometheus.CounterValue, uplinkCountFloat, gw.GatewayID, gw.Name)
 				}
-				ch <- prometheus.MustNewConstMetric(uplinkCount, prometheus.CounterValue, uplinkCountFloat, gw.GatewayID, gw.Name)
 			}
 
 			if gw.Stats.DownlinkCount != "" {
 				downlinkCountFloat, err := strconv.ParseFloat(gw.Stats.DownlinkCount, 64)
 				if err != nil {
 					e.logger.Error("Failed to convert DownlinkCount to float64", "err", err.Error(), "value", gw.Stats.DownlinkCount)
+				} else {
+					ch <- prometheus.MustNewConstMetric(downlinkCount, prometheus.CounterValue, downlinkCountFloat, gw.GatewayID, gw.Name)
 				}
-				ch <- prometheus.MustNewConstMetric(downlinkCount, prometheus.CounterValue, downlinkCountFloat, gw.GatewayID, gw.Name)
 			}
 
 			if gw.Stats.TxAcknowledgementCount != "" {
 				txAcknowledgementCountFloat, err := strconv.ParseFloat(gw.Stats.TxAcknowledgementCount, 64)
 				if err != nil {
 					e.logger.Error("Failed to convert TxAcknowledgementCount to float64", "err", err.Error(), "value", gw.Stats.TxAcknowledgementCount)
+				} else {
+					ch <- prometheus.MustNewConstMetric(txAcknowledgementCount, prometheus.CounterValue, txAcknowledgementCountFloat, gw.GatewayID, gw.Name)
 				}
-				ch <- prometheus.MustNewConstMetric(txAcknowledgementCount, prometheus.CounterValue, txAcknowledgementCountFloat, gw.GatewayID, gw.Name)
 			}
 
 			if gw.Stats.RoundTripTimes != nil {
@@ -202,7 +200,7 @@ func (e *Exporter) parseVersion(ch chan<- prometheus.Metric, data []collector.Ga
 	}
 }
 
-func BoolToFloat(b bool) float64 {
+func boolToFloat(b bool) float64 {
 	if b {
 		return 1
 	}
@@ -242,6 +240,7 @@ func main() {
 	registry := prometheus.NewRegistry()
 	registry.MustRegister(
 		collectors.NewGoCollector(),
+		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 		exporter,
 		versioncollector.NewCollector("ttn_exporter"),
 	)
