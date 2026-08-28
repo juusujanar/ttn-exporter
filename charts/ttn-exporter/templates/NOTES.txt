@@ -1,0 +1,22 @@
+ttn-exporter has been deployed.
+
+Image:     {{ include "ttn-exporter.image" . }}
+Service:   {{ include "ttn-exporter.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+
+To check it locally:
+
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "ttn-exporter.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+  curl http://localhost:{{ .Values.service.port }}{{ .Values.web.telemetryPath }}
+
+{{- if and (not .Values.apiKey.existingSecret) (not .Values.apiKey.value) }}
+
+WARNING: apiKey.value is empty and apiKey.existingSecret is not set. The exporter requires
+TTN_API_KEY to start — set --set apiKey.value=<key> or point apiKey.existingSecret at a
+pre-existing Secret.
+{{- end }}
+
+{{- if not .Values.serviceMonitor.enabled }}
+
+Prometheus Operator scraping is disabled. Set --set serviceMonitor.enabled=true to create a
+ServiceMonitor (requires the monitoring.coreos.com CRDs).
+{{- end }}

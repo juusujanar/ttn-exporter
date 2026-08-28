@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "ttn-exporter.fullname" . }}-test-connection
+  labels:
+    {{- include "ttn-exporter.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  restartPolicy: Never
+  containers:
+    - name: wget
+      image: busybox:1.36
+      command:
+        - wget
+      args:
+        - "-T"
+        - "5"
+        - "-O-"
+        - "http://{{ include "ttn-exporter.fullname" . }}:{{ .Values.service.port }}/"

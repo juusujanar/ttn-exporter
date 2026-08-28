@@ -1,0 +1,13 @@
+# Values used by `ct install` in CI. The API key is a placeholder — it never needs to be a
+# real credential because the probes below only ever hit "/", not "/metrics", so the pod
+# reaches Ready without making any real call to the TTN API.
+apiKey:
+  value: "ci-fake-key-not-real"
+
+resources:
+  requests:
+    cpu: 5m
+    memory: 16Mi
+  limits:
+    cpu: 50m
+    memory: 32Mi

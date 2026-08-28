@@ -1,0 +1,112 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+Works with:
+- The Things Network v3 Community edition - tested, default
+- Things Industries - untested
+- self-hosted Things Stack instances - untested
+
+See [docs/ARCHITECTURE.md](https://github.com/juusujanar/ttn-exporter/blob/main/docs/ARCHITECTURE.md)
+in the main repository for how the exporter fetches data and the full list of exported metrics.
+
+{{ template "chart.homepageLine" . }}
+
+## Prerequisites
+
+- Kubernetes 1.24+
+- Helm 3.8+ (needed for `oci://` chart installs)
+- Prometheus Operator CRDs, only if you plan to set `serviceMonitor.enabled=true`
+
+## Getting a TTN API key
+
+To use this exporter, you need to generate a user or an organization API key. Gateway API keys
+do not work, because the exporter needs permissions to dynamically load the list of gateways.
+
+When you create an organization or user API key, grant it these rights:
+- **List the gateways the organization/user is a collaborator of** - required to get a list of gateways
+- **View gateway status** - to get gateway status and metrics
+
+## Installing the chart
+
+This chart is published as an OCI artifact to GitHub Container Registry.
+
+```bash
+helm install ttn-exporter oci://ghcr.io/juusujanar/charts/ttn-exporter \
+  --version {{ template "chart.version" . }} \
+  --set apiKey.value=<key>
+```
+
+Or, from a local checkout of the source repository:
+
+```bash
+git clone https://github.com/juusujanar/ttn-exporter.git
+helm install ttn-exporter ./ttn-exporter/charts/ttn-exporter --set apiKey.value=<key>
+```
+
+## Supplying the API key
+
+For a quick test, pass the key directly and let the chart create the Secret:
+
+```bash
+helm install ttn-exporter oci://ghcr.io/juusujanar/charts/ttn-exporter \
+  --set apiKey.value=<key>
+```
+
+For production, create the Secret yourself and point the chart at it, so the key never appears
+in `helm history`/release state as plain values:
+
+```bash
+kubectl create secret generic ttn-api-key --from-literal=TTN_API_KEY=<key>
+
+helm install ttn-exporter oci://ghcr.io/juusujanar/charts/ttn-exporter \
+  --set apiKey.existingSecret=ttn-api-key
+```
+
+## Connecting to a different Things Stack instance
+
+The chart defaults to the Things Network Community Edition (`eu1.cloud.thethings.network`). To
+point at another region or a self-hosted/Things Industries instance:
+
+```bash
+helm install ttn-exporter oci://ghcr.io/juusujanar/charts/ttn-exporter \
+  --set apiKey.value=<key> \
+  --set ttn.uri="https://<tenant>.<region>.cloud.thethings.industries/"
+```
+
+## Enabling Prometheus Operator scraping
+
+```bash
+helm install ttn-exporter oci://ghcr.io/juusujanar/charts/ttn-exporter \
+  --set apiKey.value=<key> \
+  --set serviceMonitor.enabled=true
+```
+
+Each scrape triggers a synchronous call chain against the TTN API (list gateways, then one stats
+call per gateway, bounded by `ttn.concurrency`). For large gateway fleets, raise
+`serviceMonitor.scrapeTimeout`/`serviceMonitor.interval` and/or `ttn.concurrency` together if you
+see scrape timeouts.
+
+## Upgrading
+
+```bash
+helm upgrade ttn-exporter oci://ghcr.io/juusujanar/charts/ttn-exporter --reuse-values
+```
+
+`image.tag` defaults to the chart's `appVersion`, so a chart upgrade alone can also bump the
+running exporter version — check the chart's release notes before upgrading in production.
+
+## Uninstalling
+
+```bash
+helm uninstall ttn-exporter
+```
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

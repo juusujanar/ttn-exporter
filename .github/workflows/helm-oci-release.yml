@@ -1,0 +1,44 @@
+name: Helm chart release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "charts/ttn-exporter/**"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 2
+
+      - name: Check if chart version changed
+        id: version-check
+        run: |
+          new_version=$(yq -r '.version' charts/ttn-exporter/Chart.yaml)
+          old_version=$(git show HEAD~1:charts/ttn-exporter/Chart.yaml 2>/dev/null | yq -r '.version' || echo "")
+          echo "new_version=${new_version}" >> "$GITHUB_OUTPUT"
+          if [[ "${new_version}" != "${old_version}" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        if: steps.version-check.outputs.changed == 'true'
+
+      - name: Log in to ghcr.io
+        if: steps.version-check.outputs.changed == 'true'
+        run: helm registry login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package and push chart
+        if: steps.version-check.outputs.changed == 'true'
+        run: |
+          helm package charts/ttn-exporter -d /tmp/helm-package
+          helm push "/tmp/helm-package/ttn-exporter-${{ steps.version-check.outputs.new_version }}.tgz" oci://ghcr.io/juusujanar/charts
