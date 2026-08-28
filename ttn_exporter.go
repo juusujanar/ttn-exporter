@@ -246,18 +246,28 @@ func main() {
 		versioncollector.NewCollector("ttn_exporter"),
 	)
 
-	http.Handle(*metricsPath, promhttp.HandlerFor(registry, promhttp.HandlerOpts{Registry: registry}))
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte(`<html>
-      <head><title>TTN Exporter</title></head>
-      <body>
-        <h1>The Things Network Exporter</h1>
-        <p><a href='` + *metricsPath + `'>Metrics</a></p>
-        <p><a href='` + *ttnURI + `'>Things Stack</a></p>
-        <p><a href='https://github.com/juusujanar/ttn-exporter'>GitHub</a></p>
-      </body>
-    </html>`))
+	landingPage, err := web.NewLandingPage(web.LandingConfig{
+		Name:        "The Things Network Exporter",
+		Description: "Prometheus exporter for The Things Stack API",
+		Version:     version.Info(),
+		Links: []web.LandingLinks{
+			{
+				Address: *metricsPath,
+				Text:    "Metrics",
+			},
+			{
+				Address: *ttnURI,
+				Text:    "Things Stack",
+			},
+			{
+				Address: "https://github.com/juusujanar/ttn-exporter",
+				Text:    "GitHub",
+			},
+		},
 	})
+	http.Handle("/", landingPage)
+	http.Handle(*metricsPath, promhttp.HandlerFor(registry, promhttp.HandlerOpts{Registry: registry}))
+
 	srv := &http.Server{
 		ReadHeaderTimeout: 1 * time.Second,
 	}
