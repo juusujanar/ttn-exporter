@@ -9,6 +9,7 @@ permissions:
   contents: write
   packages: write
   issues: write
+  pull-requests: write
 
 jobs:
   goreleaser:
@@ -51,3 +52,23 @@ jobs:
           args: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Open PR to update README version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git fetch origin main
+          git checkout -B "docs/readme-version-${GITHUB_REF_NAME}" origin/main
+          sed -i "s#ttn-exporter:v[0-9]\+\.[0-9]\+\.[0-9]\+#ttn-exporter:${GITHUB_REF_NAME}#g" README.md
+          if ! git diff --quiet -- README.md; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add README.md
+            git commit -m "docs: update README to ${GITHUB_REF_NAME}"
+            git push --force origin "docs/readme-version-${GITHUB_REF_NAME}"
+            gh pr create \
+              --title "docs: update README to ${GITHUB_REF_NAME}" \
+              --body "Automated update of the Docker image tag referenced in README.md to \`${GITHUB_REF_NAME}\`." \
+              --base main \
+              --head "docs/readme-version-${GITHUB_REF_NAME}"
+          fi
