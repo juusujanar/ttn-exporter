@@ -105,7 +105,7 @@ func NewExporter(uri string, apiKey string, sslVerify bool, timeout time.Duratio
 			},
 		},
 		totalScrapes: prometheus.NewCounter(prometheus.CounterOpts{
-			Name: prometheus.BuildFQName(namespace, "exporter", "scrapes_total"),
+			Name: "exporter_scrapes_total",
 			Help: "Total number of scrapes.",
 		}),
 		logger: logger,
