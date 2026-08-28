@@ -12,7 +12,7 @@
   "schedule": [
     "before 8am"
   ],
-  "minimumReleaseAge": "14 days",
+  "minimumReleaseAge": "5 days",
   "vulnerabilityAlerts": {
     "labels": ["type:security"],
     "minimumReleaseAge": null
