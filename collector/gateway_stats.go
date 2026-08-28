@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"time"
@@ -70,7 +71,7 @@ type GatewayStatsResponse struct {
 	} `json:"gateway_remote_address"`
 }
 
-func getGatewayStats(client *http.Client, uri string, apiKey string, gatewayID string) (*GatewayStatsResponse, error) {
+func getGatewayStats(client *http.Client, uri string, apiKey string, gatewayID string, logger *slog.Logger) (*GatewayStatsResponse, error) {
 	u, err := url.Parse(uri)
 	if err != nil {
 		return nil, err
@@ -86,7 +87,7 @@ func getGatewayStats(client *http.Client, uri string, apiKey string, gatewayID s
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 
-	res, err := client.Do(req)
+	res, err := doWithRateLimitRetry(client, req, logger)
 	if err != nil {
 		return nil, err
 	}

@@ -3,6 +3,8 @@ package collector
 import (
 	"log/slog"
 	"net/http"
+
+	"golang.org/x/sync/errgroup"
 )
 
 const userAgent = "ttn-prometheus-exporter/1.0.0"
@@ -14,29 +16,38 @@ type GatewayData struct {
 	Stats     *GatewayStatsResponse
 }
 
-func GetInfo(client *http.Client, uri string, apiKey string, logger *slog.Logger) ([]GatewayData, error) {
-	gateways, err := getGatewayList(client, uri, apiKey)
+// GetInfo lists all gateways and fetches each one's connection stats
+// concurrently, bounded by concurrency. A single gateway's stats fetch
+// failing only marks that gateway as disconnected; it does not fail the
+// whole scrape.
+func GetInfo(client *http.Client, uri string, apiKey string, concurrency int, logger *slog.Logger) ([]GatewayData, error) {
+	gateways, err := getGatewayList(client, uri, apiKey, logger)
 	if err != nil {
 		return nil, err
 	}
 
-	allStats := []GatewayData{}
-	for _, gateway := range *gateways {
-		gatewayID := gateway.IDs.GatewayID
-		gatewayStats, err := getGatewayStats(client, uri, apiKey, gatewayID)
-		if err != nil {
-			logger.Warn("Failed to scrape gateway", "gatewayID", gatewayID, "err", err.Error())
-		}
-		connected := err == nil
-		allStats = append(allStats, GatewayData{
-			GatewayID: gatewayID,
-			Name:      gateway.Name,
-			Connected: connected,
-			Stats:     gatewayStats,
+	allStats := make([]GatewayData, len(gateways))
+
+	g := new(errgroup.Group)
+	g.SetLimit(concurrency)
+
+	for i, gateway := range gateways {
+		g.Go(func() error {
+			gatewayID := gateway.IDs.GatewayID
+			gatewayStats, err := getGatewayStats(client, uri, apiKey, gatewayID, logger)
+			if err != nil {
+				logger.Warn("Failed to scrape gateway", "gatewayID", gatewayID, "err", err.Error())
+			}
+			allStats[i] = GatewayData{
+				GatewayID: gatewayID,
+				Name:      gateway.Name,
+				Connected: err == nil,
+				Stats:     gatewayStats,
+			}
+			return nil
 		})
 	}
+	_ = g.Wait()
 
-	client.CloseIdleConnections()
-
-	return allStats, err
+	return allStats, nil
 }

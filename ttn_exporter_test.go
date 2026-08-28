@@ -77,13 +77,13 @@ func TestServer(t *testing.T) {
 	h := newTTNServer(t)
 	defer h.Close()
 
-	e, _ := NewExporter(h.URL, apiKey, false, 5*time.Second, promslog.NewNopLogger())
+	e, _ := NewExporter(h.URL, apiKey, false, 5*time.Second, 5, promslog.NewNopLogger())
 
 	expectMetrics(t, e, "gateway_stats.metrics")
 }
 
 func TestInvalidScheme(t *testing.T) {
-	e, err := NewExporter("gopher://gopher.quux.org", apiKey, false, 1*time.Second, promslog.NewNopLogger())
+	e, err := NewExporter("gopher://gopher.quux.org", apiKey, false, 1*time.Second, 5, promslog.NewNopLogger())
 	if expect, got := (*Exporter)(nil), e; expect != got {
 		t.Errorf("expected %v, got %v", expect, got)
 	}
