@@ -7,6 +7,9 @@ Works with:
 - Things Industries - untested
 - self-hosted Things Stack instances - untested
 
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the exporter fetches data, the
+full list of exported metrics, and the complete configuration reference.
+
 ## Badges
 
 [![Release](https://img.shields.io/github/release/juusujanar/ttn-exporter.svg?style=for-the-badge)](https://github.com/juusujanar/ttn-exporter/releases/latest)
@@ -27,7 +30,7 @@ export TTN_API_KEY=<key>
 If you want to use Docker:
 
 ```bash
-docker run -p 9981:9981 -e TTN_API_KEY=<key> ghcr.io/juusujanar/ttn-exporter:v1.0.4
+docker run -p 9981:9981 -e TTN_API_KEY=<key> ghcr.io/juusujanar/ttn-exporter:v1.5.0
 ```
 
 Help on flags:
@@ -66,7 +69,7 @@ TTN_API_KEY=<key> ttn_exporter --ttn.uri="https://<tenant>.<region>.cloud.thethi
 To run the exporter as a Docker container, run:
 
 ```bash
-docker run -p 9981:9981 -e TTN_API_KEY=<key> ghcr.io/juusujanar/ttn-exporter:v1.0.4 --ttn.uri="https://<tenant>.<region>.cloud.thethings.industries/"
+docker run -p 9981:9981 -e TTN_API_KEY=<key> ghcr.io/juusujanar/ttn-exporter:v1.5.0 --ttn.uri="https://<tenant>.<region>.cloud.thethings.industries/"
 ```
 
 [docker hub]: https://hub.docker.com/r/janarj/ttn-exporter/
