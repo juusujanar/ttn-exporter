@@ -16,7 +16,7 @@ keywords:
   - iot
   - monitoring
 maintainers:
-  - name: Janar Juusu
+  - name: juusujanar
     url: https://github.com/juusujanar
 annotations:
   artifacthub.io/license: MIT

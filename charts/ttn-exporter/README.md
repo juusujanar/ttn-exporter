@@ -159,7 +159,9 @@ helm uninstall ttn-exporter
 | serviceMonitor.metricRelabelings | list | `[]` |  |
 | serviceMonitor.namespace | string | `""` | Namespace to create the ServiceMonitor in. Defaults to the release namespace. |
 | serviceMonitor.relabelings | list | `[]` |  |
+| serviceMonitor.scheme | string | `"http"` | Scheme to use for scraping. Set to https if TLS is enabled on the exporter (via web.configFile). |
 | serviceMonitor.scrapeTimeout | string | `"30s"` | Scrape timeout. Each scrape is a synchronous call chain bounded by ttn.concurrency; size this together with ttn.timeout and gateway count. |
+| serviceMonitor.tlsConfig | object | `{}` | TLS configuration for scraping (e.g., insecureSkipVerify: true). |
 | startupProbe.enabled | bool | `false` | Enable a startup probe. Usually unnecessary; the binary starts near-instantly. |
 | startupProbe.failureThreshold | int | `30` |  |
 | startupProbe.httpGet.path | string | `"/"` |  |
