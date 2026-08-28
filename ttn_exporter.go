@@ -265,6 +265,11 @@ func main() {
 			},
 		},
 	})
+	if err != nil {
+		logger.Error("Error creating landing page", "err", err.Error())
+		os.Exit(1)
+	}
+
 	http.Handle("/", landingPage)
 	http.Handle(*metricsPath, promhttp.HandlerFor(registry, promhttp.HandlerOpts{Registry: registry}))
 
